@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: _size.height * 0.75,
                           child: ScaleTap(
                             onPressed: () =>
-                                Navigator.pushNamed(context, MyRoute.workers),
+                                Navigator.pushNamed(context, MyRoute.nikashi),
                             scaleMinValue: 0.5,
                             child: Card(
                               shape: RoundedRectangleBorder(
@@ -162,6 +162,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
+              ),
+              SliverToBoxAdapter(
+                child: TextButton(onPressed: () => Navigator.pushNamed(context, MyRoute.workers), child: Text("Workers")),
+              ),
+              SliverToBoxAdapter(
+                child: TextButton(onPressed: () => Navigator.pushNamed(context, MyRoute.transactions), child: Text("Transactions")),
               ),
             ],
           ),

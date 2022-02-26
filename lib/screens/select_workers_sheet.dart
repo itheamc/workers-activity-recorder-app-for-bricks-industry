@@ -1,6 +1,8 @@
 import 'package:daily_records_sandip/models/worker.dart';
+import 'package:daily_records_sandip/providers/database_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_scale_tap/flutter_scale_tap.dart';
+import 'package:provider/provider.dart';
 
 class SelectWorkerSheet extends StatefulWidget {
   const SelectWorkerSheet({Key? key}) : super(key: key);
@@ -15,6 +17,10 @@ class _SelectWorkerSheetState extends State<SelectWorkerSheet> {
   @override
   void initState() {
     _controller = ScrollController();
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      DatabaseProvider p = Provider.of<DatabaseProvider>(context, listen: false);
+      await p.workers();
+    });
     super.initState();
   }
 
@@ -28,7 +34,6 @@ class _SelectWorkerSheetState extends State<SelectWorkerSheet> {
   Widget build(BuildContext context) {
     final _theme = Theme.of(context);
     const _radius = 24.0;
-    final _workers = dummyWorkers;
 
     return SafeArea(
       child: Align(
@@ -110,25 +115,30 @@ class _SelectWorkerSheetState extends State<SelectWorkerSheet> {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  child: CustomScrollView(
-                    controller: _controller,
-                    slivers: [
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (_, index) => _WorkerTile(
-                            worker: _workers[index],
-                            onPressed: () =>
-                                Navigator.pop(context, _workers[index]),
+                  child: Consumer<DatabaseProvider>(
+                    builder: (_, provider, child) {
+                      final _workers = provider.workersList;
+                      return CustomScrollView(
+                        controller: _controller,
+                        slivers: [
+                          SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (_, index) => _WorkerTile(
+                                worker: _workers[index],
+                                onPressed: () =>
+                                    Navigator.pop(context, _workers[index]),
+                              ),
+                              childCount: _workers.length,
+                            ),
                           ),
-                          childCount: _workers.length,
-                        ),
-                      ),
-                      const SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: 20.0,
-                        ),
-                      )
-                    ],
+                          const SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 20.0,
+                            ),
+                          )
+                        ],
+                      );
+                    }
                   ),
                 )
               ],
@@ -168,7 +178,6 @@ class _WorkerTileState extends State<_WorkerTile> {
   @override
   Widget build(BuildContext context) {
     final _theme = Theme.of(context);
-    final _id = widget.worker.id;
 
     return ScaleTap(
       onPressed: widget.onPressed,
@@ -177,8 +186,6 @@ class _WorkerTileState extends State<_WorkerTile> {
         duration: const Duration(milliseconds: 375),
         transform: _init
             ? Matrix4.translationValues(0, 0, 0)
-            : _id! % 2 == 0
-                ? Matrix4.translationValues(-100, -50, 0)
                 : Matrix4.translationValues(100, 50, 0),
         child: Card(
           color: Colors.white24,
@@ -187,7 +194,7 @@ class _WorkerTileState extends State<_WorkerTile> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
             child: Text(
-              "${widget.worker.name}",
+              widget.worker.name,
               style: _theme.textTheme.bodyText1?.copyWith(
                   color: Colors.white70, fontWeight: FontWeight.bold),
             ),

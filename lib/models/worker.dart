@@ -1,51 +1,35 @@
+import 'package:daily_records_sandip/utils/date_handler.dart';
+import 'package:daily_records_sandip/utils/id_handler.dart';
 
 class Worker {
-  int? id;
-  String? name;
+  String id;
+  String name;
+  int created;
 
-  Worker({this.id, this.name});
+  Worker({required this.id, required this.name, required this.created});
+
+  // Function to create map
+  Map<String, dynamic> toMap() {
+    return {'id': id, 'name': name, 'created': created};
+  }
+
+  // Function to copy and/or edit worker object
+  Worker copy({String? id, String? name, int? created}) {
+    return Worker(id: id ?? this.id, name: name ?? this.name, created: created ?? this.created);
+  }
+
+  // Function to convert map to Worker object
+  static Worker fromMap(Map<String, dynamic> map) {
+    return Worker(id: map['id'], name: map['name'], created: map['created']);
+  }
+
+  // Function to create workers list from maps
+  static List<Worker> workers(List<Map<String, dynamic>> maps) {
+    return maps.map((map) => fromMap(map)).toList();
+  }
+
+  // Function to create worker
+  static Worker create(String name) {
+    return Worker(id: IdHandler.uuid4(), name: name, created: DateHandler.current);
+  }
 }
-
-
-final dummyWorkers = [
-  Worker(
-    id: 1,
-    name: "Hemant"
-  ),
-  Worker(
-      id: 2,
-      name: "Lahour"
-  ),
-  Worker(
-      id: 3,
-      name: "Sita"
-  ),
-  Worker(
-      id: 4,
-      name: "Hurman"
-  ),
-  Worker(
-      id: 5,
-      name: "Goma"
-  ),
-  Worker(
-      id: 6,
-      name: "Sher lal"
-  ),
-  Worker(
-      id: 7,
-      name: "Shivani"
-  ),
-  Worker(
-      id: 8,
-      name: "John Doe"
-  ),
-  Worker(
-      id: 9,
-      name: "Sohil"
-  ),
-  Worker(
-      id: 10,
-      name: "Rohan"
-  ),
-];

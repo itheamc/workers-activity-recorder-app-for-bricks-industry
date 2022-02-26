@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:daily_records_sandip/models/record.dart';
+import 'package:daily_records_sandip/models/record_type.dart';
+import 'package:daily_records_sandip/models/transaction.dart';
 import 'package:daily_records_sandip/models/worker.dart';
+import 'package:daily_records_sandip/providers/database_provider.dart';
 import 'package:daily_records_sandip/screens/select_workers_sheet.dart';
+import 'package:daily_records_sandip/utils/progress_status.dart';
 import 'package:daily_records_sandip/utils/route_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_scale_tap/flutter_scale_tap.dart';
+import 'package:provider/provider.dart';
 
 class BharaiScreen extends StatefulWidget {
   const BharaiScreen({Key? key}) : super(key: key);
@@ -14,10 +21,12 @@ class BharaiScreen extends StatefulWidget {
 
 class _BharaiScreenState extends State<BharaiScreen> {
   Worker? _worker;
-  final records = <Record>[];
+  final _records = <Record>[];
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _heightController;
   late TextEditingController _lengthController;
+  bool error = false;
+  String err = "";
 
   @override
   void initState() {
@@ -26,11 +35,36 @@ class _BharaiScreenState extends State<BharaiScreen> {
     super.initState();
   }
 
+  // Function to add record
+  void _onRecordAdd() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _records.add(Record.create(num.parse(_heightController.text),
+            num.parse(_lengthController.text)));
+        _heightController.text = "";
+        _lengthController.text = "";
+      });
+    }
+  }
+
+  // Show error
+  void _showError(String err) async {
+    setState(() {
+      this.err = err;
+      error = true;
+    });
+    Timer(const Duration(milliseconds: 2500), () {
+      setState(() {
+        error = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final _theme = Theme.of(context);
-    final total = records.isNotEmpty
-        ? records
+    final total = _records.isNotEmpty
+        ? _records
             .map((e) => e.total)
             .reduce((value, element) => (value ?? 0) + (element ?? 0))
         : 0;
@@ -42,7 +76,7 @@ class _BharaiScreenState extends State<BharaiScreen> {
             var res = await Navigator.push(
                 context,
                 SlidePageRoute(const SelectWorkerSheet(),
-                    begin: const Offset(1.0, -0.1)));
+                    begin: const Offset(1.0, -0.5)));
             if (res != null) {
               setState(() {
                 _worker = res;
@@ -50,7 +84,19 @@ class _BharaiScreenState extends State<BharaiScreen> {
             }
           },
           scaleMinValue: 0.85,
-          child: Text(_worker?.name ?? "Sandip Chaudhary"),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_worker?.name ?? "कामदारहरु छान्नुहोस्।"),
+              if (error)
+                Text(
+                  err,
+                  style: _theme.textTheme.caption?.copyWith(
+                      color: Colors.yellowAccent, fontStyle: FontStyle.italic),
+                ),
+            ],
+          ),
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -134,24 +180,12 @@ class _BharaiScreenState extends State<BharaiScreen> {
                                   keyboardType: TextInputType.number,
                                   style: _theme.textTheme.bodyText1?.copyWith(
                                       color: Colors.white, fontSize: 16.0),
+                                  textInputAction: TextInputAction.previous,
                                 ),
                                 FractionallySizedBox(
                                   widthFactor: 1,
                                   child: OutlinedButton(
-                                    onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        setState(() {
-                                          records.add(Record(
-                                              id: records.length,
-                                              gota: num.parse(
-                                                  _lengthController.text),
-                                              line: num.parse(
-                                                  _heightController.text)));
-                                        });
-                                        _heightController.text = "";
-                                        _lengthController.text = "";
-                                      }
-                                    },
+                                    onPressed: _onRecordAdd,
                                     child: Text(
                                       "Add",
                                       style: _theme.textTheme.button
@@ -176,59 +210,16 @@ class _BharaiScreenState extends State<BharaiScreen> {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           child: ListView.builder(
-                            itemCount: records.length,
+                            itemCount: _records.length,
                             itemBuilder: (BuildContext context, int index) {
-                              final record = records[index];
-                              return ScaleTap(
-                                onPressed: () {},
-                                scaleMinValue: 0.85,
-                                child: Card(
-                                  elevation: 0.5,
-                                  shadowColor: Colors.lightBlue.shade100,
-                                  margin:
-                                      const EdgeInsets.symmetric(vertical: 5.0),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            mainAxisSize: MainAxisSize.max,
-                                            children: [
-                                              Text("${record.line}"),
-                                              const Text("X"),
-                                              Text("${record.gota}"),
-                                              const Text("="),
-                                              Text(
-                                                "${record.total}",
-                                                style:
-                                                    _theme.textTheme.bodyText1,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      Align(
-                                        alignment: Alignment.topRight,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              records.remove(record);
-                                            });
-                                          },
-                                          child: const Icon(
-                                            Icons.close,
-                                            size: 12.0,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                              final record = _records[index];
+                              return RecordTile(
+                                record: record,
+                                onRemoved: () {
+                                  setState(() {
+                                    _records.remove(record);
+                                  });
+                                },
                               );
                             },
                           ),
@@ -242,47 +233,178 @@ class _BharaiScreenState extends State<BharaiScreen> {
           ),
           FractionallySizedBox(
             widthFactor: 1.0,
-            child: Padding(
-              padding:
-                  const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10.0, vertical: 20.0),
-                decoration: BoxDecoration(
-                  color: Colors.pink[800],
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(8.0),
-                  ),
-                ),
+            child: TotalSection(total: total),
+          ),
+          SaveButton(
+            worker: _worker,
+            records: _records,
+            recordType: RecordType.bharai,
+            onError: (err) => _showError(err),
+            onSuccess: () {
+              setState(() {
+                _records.clear();
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Record tile
+class RecordTile extends StatelessWidget {
+  final Record record;
+  final VoidCallback? onRemoved;
+
+  const RecordTile({Key? key, required this.record, this.onRemoved})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final _theme = Theme.of(context);
+
+    return ScaleTap(
+      onPressed: () {},
+      scaleMinValue: 0.85,
+      child: Card(
+        elevation: 0.5,
+        shadowColor: Colors.lightBlue.shade100,
+        margin: const EdgeInsets.symmetric(vertical: 5.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
                   children: [
-                    Expanded(
-                      child: Text(
-                        "जम्मा",
-                        style: _theme.textTheme.headline6
-                            ?.copyWith(color: Colors.white),
-                      ),
-                    ),
+                    Text("${record.first}"),
+                    const Text("X"),
+                    Text("${record.second}"),
+                    const Text("="),
                     Text(
-                      "$total",
-                      style: _theme.textTheme.headline6
-                          ?.copyWith(color: Colors.white),
+                      "${record.total}",
+                      style: _theme.textTheme.bodyText1,
                     ),
                   ],
                 ),
               ),
             ),
+            Align(
+              alignment: Alignment.topRight,
+              child: GestureDetector(
+                onTap: onRemoved,
+                child: const Icon(
+                  Icons.close,
+                  size: 12.0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Widget for total section
+class TotalSection extends StatelessWidget {
+  final num? total;
+
+  const TotalSection({Key? key, required this.total}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final _theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+        decoration: BoxDecoration(
+          color: Colors.pink[800],
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(8.0),
           ),
-          FractionallySizedBox(
-            widthFactor: 1.0,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                "जम्मा",
+                style:
+                    _theme.textTheme.headline6?.copyWith(color: Colors.white),
+              ),
+            ),
+            Text(
+              "$total",
+              style: _theme.textTheme.headline6?.copyWith(color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Button Widget
+class SaveButton extends StatelessWidget {
+  final Worker? worker;
+  final List<Record> records;
+  final RecordType recordType;
+  final Function(String err)? onError;
+  final VoidCallback? onSuccess;
+
+  const SaveButton({
+    Key? key,
+    required this.worker,
+    required this.records,
+    required this.recordType,
+    this.onError,
+    this.onSuccess,
+  }) : super(key: key);
+
+  // Function to add transaction
+  Future<void> _onTransactionAdd(DatabaseProvider provider) async {
+    if (worker == null) {
+      if (onError != null) onError!("कृपया कामदार छान्नुहोस्।");
+      return;
+    }
+    if (records.isEmpty) {
+      if (onError != null) onError!("कृपया पहिले डेटा एड गर्नुहोस्।");
+      return;
+    }
+    if (provider.transactionStatus == ADatabaseStatus.inserting) {
+      if (onError != null) onError!("डेटा एड भइरहेको छ। कृपया परखिनुहोस।");
+      return;
+    }
+    await provider.insertTransaction(ATransaction.create(
+        worker: worker!, records: records, recordType: RecordType.bharai));
+    if (onSuccess != null) onSuccess!();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final _theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
+      child: Consumer<DatabaseProvider>(builder: (_, provider, index) {
+        return Stack(
+          children: [
+            FractionallySizedBox(
+              widthFactor: 1,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () async {
+                  await _onTransactionAdd(provider);
+                },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 15.0),
                   child: Text(
-                    "Save",
+                    "SAVE",
                     style: _theme.textTheme.bodyText1
                         ?.copyWith(color: Colors.pink[900], fontSize: 16.0),
                   ),
@@ -293,9 +415,25 @@ class _BharaiScreenState extends State<BharaiScreen> {
                     onPrimary: Colors.lightBlueAccent),
               ),
             ),
-          ),
-        ],
-      ),
+            if (provider.transactionStatus == ADatabaseStatus.inserting)
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  height: 50.0,
+                  width: 90.0,
+                  alignment: Alignment.centerLeft,
+                  child: const SizedBox(
+                    width: 15.0,
+                    height: 15.0,
+                    child: CircularProgressIndicator.adaptive(
+                      strokeWidth: 1.75,
+                    ),
+                  ),
+                ),
+              )
+          ],
+        );
+      }),
     );
   }
 }

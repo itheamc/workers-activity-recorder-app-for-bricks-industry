@@ -4,4 +4,5 @@ class MyRoute {
   static String nikashi = "/nikashi";
   static String bharai = "/bharai";
   static String pakki = "/pakki";
+  static String transactions = "/transactions";
 }
