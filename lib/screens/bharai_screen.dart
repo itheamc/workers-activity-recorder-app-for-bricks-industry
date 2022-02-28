@@ -6,6 +6,7 @@ import 'package:daily_records_sandip/models/transaction.dart';
 import 'package:daily_records_sandip/models/worker.dart';
 import 'package:daily_records_sandip/providers/database_provider.dart';
 import 'package:daily_records_sandip/screens/select_workers_sheet.dart';
+import 'package:daily_records_sandip/utils/extension_fn.dart';
 import 'package:daily_records_sandip/utils/progress_status.dart';
 import 'package:daily_records_sandip/utils/route_handler.dart';
 import 'package:flutter/material.dart';
@@ -63,11 +64,7 @@ class _BharaiScreenState extends State<BharaiScreen> {
   @override
   Widget build(BuildContext context) {
     final _theme = Theme.of(context);
-    final total = _records.isNotEmpty
-        ? _records
-            .map((e) => e.total)
-            .reduce((value, element) => (value ?? 0) + (element ?? 0))
-        : 0;
+    final total = _records.total() ?? 0;
     return Scaffold(
       backgroundColor: Colors.pink.shade400,
       appBar: AppBar(
@@ -313,8 +310,8 @@ class RecordTile extends StatelessWidget {
 /// Widget for total section
 class TotalSection extends StatelessWidget {
   final num? total;
-
-  const TotalSection({Key? key, required this.total}) : super(key: key);
+  final Color? color;
+  const TotalSection({Key? key, required this.total, this.color}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -325,7 +322,7 @@ class TotalSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
         decoration: BoxDecoration(
-          color: Colors.pink[800],
+          color: color ?? Colors.pink.shade800,
           borderRadius: const BorderRadius.vertical(
             bottom: Radius.circular(8.0),
           ),

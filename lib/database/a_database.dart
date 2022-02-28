@@ -125,18 +125,21 @@ class ADatabase {
   ///--------------------------------------------------------------------------
   // Function to fetch transaction
   Future<List<ATransaction>> transactions() async {
-    List<Map<String, dynamic>>? maps = await _database?.query(_transactionsTable);
+    List<Map<String, dynamic>>? maps = await _database?.query(_transactionsTable, orderBy: 'created DESC', limit: 200);
     if (maps != null && maps.isNotEmpty) {
       List<Map<String, dynamic>> temps = [];
       for (var map in maps) {
         Map<String, dynamic> tMap = Map.fromEntries(map.entries);
         final w = await worker(tMap['worker']);
+        if (w == null) continue;
         await tMap.update('worker', (value) => w);
         List<Record> records = [];
         for (var id in (tMap['records'] as String).asList(', ')) {
           var r = await record(id);
-          records.add(r!);
+          if (r == null) continue;
+          records.add(r);
         }
+        if (records.isEmpty) continue;
         await tMap.update('records', (value) => records);
         temps.add(tMap);
       }

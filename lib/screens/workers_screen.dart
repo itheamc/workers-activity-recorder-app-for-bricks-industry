@@ -1,10 +1,8 @@
-import 'package:daily_records_sandip/models/worker.dart';
 import 'package:daily_records_sandip/providers/database_provider.dart';
 import 'package:daily_records_sandip/screens/add_worker_screen.dart';
 import 'package:daily_records_sandip/utils/a_clippers.dart';
 import 'package:daily_records_sandip/utils/route_handler.dart';
 import 'package:daily_records_sandip/widgets/a_dialog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_scale_tap/flutter_scale_tap.dart';
 import 'package:provider/provider.dart';
@@ -45,8 +43,10 @@ class _WorkersScreenState extends State<WorkersScreen> {
       floatingActionButton: SizedBox(
         height: 40.0,
         child: FloatingActionButton.extended(
-          onPressed: () =>
-              Navigator.push(context, SlidePageRoute(const AddWorkerScreen(), begin: const Offset(-1, 0.5))),
+          onPressed: () => Navigator.push(
+              context,
+              SlidePageRoute(const AddWorkerScreen(),
+                  begin: const Offset(-1, 0.5))),
           label: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.0),
             child: Text("Add"),
@@ -96,16 +96,20 @@ class _WorkersScreenState extends State<WorkersScreen> {
                         child: ScaleTap(
                           onPressed: () {},
                           onLongPress: () async {
-                            final res = await ADialog.showDialog(context, title: "हटाउनुहोस !!");
+                            final res = await ADialog.showDialog(context,
+                                title: "हटाउनुहोस !!");
                             if (res != null && res) {
-                             final msg = await provider.deleteWorker(workers[index]);
-                             ScaffoldMessenger.of(context).showSnackBar(
-                                 SnackBar(
-                                   content: const Text('कामदारलाई सफलतापुर्बक हटाइयो।'),
-                                   duration: const Duration(seconds: 4),
-                                   action: SnackBarAction(label: "फेरी ल्याउनुहोस।", onPressed: provider.handleWorkerUndo),
-                                 )
-                             );
+                              final msg =
+                                  await provider.deleteWorker(workers[index]);
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content:
+                                    const Text('कामदारलाई सफलतापुर्बक हटाइयो।'),
+                                duration: const Duration(seconds: 4),
+                                action: SnackBarAction(
+                                    label: "फेरी ल्याउनुहोस।",
+                                    onPressed: provider.handleWorkerUndo),
+                              ));
                             }
                           },
                           scaleMinValue: 0.85,
@@ -126,6 +130,11 @@ class _WorkersScreenState extends State<WorkersScreen> {
                       ),
                   childCount: workers.length),
             ),
+            const SliverToBoxAdapter(
+              child: SizedBox(
+                height: 40.0,
+              ),
+            )
           ],
         );
       }),

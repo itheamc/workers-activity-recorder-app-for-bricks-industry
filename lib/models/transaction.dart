@@ -90,3 +90,15 @@ class ATransaction {
         updated: DateTime.now().millisecondsSinceEpoch);
   }
 }
+
+
+class ATransactions {
+  String label;
+  List<ATransaction> transactions;
+
+  ATransactions({required this.label, required this.transactions});
+
+  ATransactions copy({String? label, List<ATransaction>? transactions}) {
+    return ATransactions(label: label ?? this.label, transactions: transactions ?? this.transactions);
+  }
+}

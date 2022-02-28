@@ -9,9 +9,9 @@ class DatabaseProvider with ChangeNotifier {
   ADatabase? _aDatabase;
   Worker? _tempWorker;
   Record? _tempRecord;
+  ATransaction? _tempTransaction;
   List<ATransaction> transactionsList = [];
   List<Worker> workersList = [];
-  ATransaction? _tempTransaction;
   ADatabaseStatus _transactionStatus = ADatabaseStatus.none;
   ADatabaseStatus _workerStatus = ADatabaseStatus.none;
 
@@ -19,6 +19,16 @@ class DatabaseProvider with ChangeNotifier {
 
   ADatabaseStatus get workerStatus => _workerStatus;
 
+  ATransaction? _selectedATransaction;
+  ATransaction? get selectedTransaction => _selectedATransaction;
+
+  void handleSelect(ATransaction? t) {
+    _selectedATransaction = t;
+    notifyListeners();
+  }
+
+
+  /// FUnction to initialize database
   Future<ADatabase> init() async {
     return await ADatabase.initialize();
   }
@@ -75,20 +85,17 @@ class DatabaseProvider with ChangeNotifier {
   Future<void> insertRecord(Record record) async {
     _aDatabase ??= await init();
     await _aDatabase?.insertRecord(record);
-    notifyListeners();
   }
 
   Future<void> updateRecord(Record record) async {
     _aDatabase ??= await init();
     await _aDatabase?.updateRecord(record);
-    notifyListeners();
   }
 
   Future<void> deleteRecord(Record record) async {
     _aDatabase ??= await init();
     _tempRecord = record.copy();
     await _aDatabase?.deleteRecord(record);
-    notifyListeners();
   }
 
   Future<void> handleRecordUndo() async {
@@ -117,12 +124,14 @@ class DatabaseProvider with ChangeNotifier {
     await _aDatabase?.insertTransaction(transaction);
     _transactionStatus = ADatabaseStatus.inserted;
     notifyListeners();
+    transactions();
   }
 
   Future<void> updateTransaction(ATransaction transaction) async {
     _aDatabase ??= await init();
     await _aDatabase?.updateTransaction(transaction);
     notifyListeners();
+    transactions();
   }
 
   Future<void> deleteTransaction(ATransaction transaction) async {
@@ -130,6 +139,7 @@ class DatabaseProvider with ChangeNotifier {
     _tempTransaction = transaction.copy();
     await _aDatabase?.deleteTransaction(transaction);
     notifyListeners();
+    transactions();
   }
 
   Future<void> handleTransactionUndo() async {

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:daily_records_sandip/models/record.dart';
 import 'package:daily_records_sandip/models/worker.dart';
 import 'package:daily_records_sandip/screens/select_workers_sheet.dart';
+import 'package:daily_records_sandip/utils/extension_fn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_scale_tap/flutter_scale_tap.dart';
 import 'package:provider/provider.dart';
@@ -64,11 +65,8 @@ class _NikashiScreenState extends State<NikashiScreen> {
   @override
   Widget build(BuildContext context) {
     final _theme = Theme.of(context);
-    final total = _records.isNotEmpty
-        ? _records
-            .map((e) => e.total)
-            .reduce((value, element) => (value ?? 0) + (element ?? 0))
-        : 0;
+    final total = _records.total() ?? 0;
+
     return Scaffold(
       backgroundColor: Colors.pink.shade400,
       appBar: AppBar(

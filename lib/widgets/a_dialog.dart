@@ -18,9 +18,13 @@ class ADialog {
         heightFactor: 0.3,
         child: Center(
           child: Material(
+            borderRadius: BorderRadius.circular(24.0),
             child: Container(
               padding: const EdgeInsets.all(15.0),
-              color: Colors.yellow.shade500,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24.0),
+                color: Colors.yellow.shade500,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -63,7 +67,12 @@ class ADialog {
                         child: ElevatedButton(
                             onPressed: () => Navigator.pop(context, false),
                             style: ElevatedButton.styleFrom(
-                                primary: Colors.grey, onPrimary: Colors.white),
+                              primary: Colors.grey,
+                              onPrimary: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(48.0),
+                              ),
+                            ),
                             child: Text(negativeBtnText ?? "नाई")),
                       ),
                       const SizedBox(
@@ -73,10 +82,14 @@ class ADialog {
                         child: ElevatedButton(
                             onPressed: () => Navigator.pop(context, true),
                             style: ElevatedButton.styleFrom(
-                                primary: Colors.redAccent,
-                                onPrimary: Colors.yellow),
+                              primary: Colors.redAccent,
+                              onPrimary: Colors.yellow,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(48.0),
+                              ),
+                            ),
                             child: Text(positiveBtnText ?? "चाहन्छु")),
-                      )
+                      ),
                     ],
                   )
                 ],
