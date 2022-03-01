@@ -18,10 +18,6 @@ class TransactionDetailScreen extends StatefulWidget {
 }
 
 class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
-
-
-
-
   /// Function to add record
   // void _onRecordAdd() {
   //   if (_formKey.currentState!.validate()) {
@@ -45,7 +41,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       final tmp_res = tmp_rec.remove(record);
       if (tmp_res) {
         if (tmp_rec.isNotEmpty) {
-          final updatedTransaction = transaction.copy(records: tmp_rec, updated: DateHandler.current);
+          final updatedTransaction =
+              transaction.copy(records: tmp_rec, updated: DateHandler.current);
           await provider.updateTransaction(updatedTransaction);
           await provider.deleteRecord(record);
           provider.handleSelect(updatedTransaction);
@@ -55,7 +52,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           provider.handleSelect(null);
           Navigator.pop(context);
         }
-
       }
     }
   }
@@ -75,10 +71,11 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           backgroundColor: Colors.orange.shade200,
           appBar: AppBar(
             title: Text(
-              "${_worker?.name}",
-              style: _theme.textTheme.headline5?.copyWith(
-                color: Colors.pink.shade900
-              ),
+              "${_worker?.name}  (${transaction?.created.toNpStyleDate()})",
+              style: _theme.textTheme.bodyText1
+                  ?.copyWith(color: Colors.pink.shade900),
+              textAlign: TextAlign.center,
+              textScaleFactor: 1.4,
             ),
             elevation: 0,
             backgroundColor: Colors.transparent,
@@ -97,7 +94,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                          colors: [Colors.orange.shade200, Colors.orange.shade300,],
+                          colors: [
+                            Colors.orange.shade200,
+                            Colors.orange.shade300,
+                          ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter),
                       borderRadius: const BorderRadius.vertical(
@@ -117,7 +117,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                     final record = _records[index];
                                     return RecordTile(
                                       record: record,
-                                      onRemoved: () => _remove(transaction!, record),
+                                      onRemoved: () =>
+                                          _remove(transaction!, record),
                                     );
                                   },
                                 )
@@ -128,7 +129,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               ),
               FractionallySizedBox(
                 widthFactor: 1.0,
-                child: TotalSection(total: _total, color: Colors.orange.shade800,),
+                child: TotalSection(
+                  total: _total,
+                  color: Colors.orange.shade800,
+                ),
               ),
             ],
           ),

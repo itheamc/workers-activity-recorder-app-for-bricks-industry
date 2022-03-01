@@ -171,7 +171,7 @@ class _SideHeader extends StatelessWidget {
             onTap: () {},
             child: Ink(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                  const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
               width: 100.0,
               color: Colors.black87,
               child: FractionallySizedBox(

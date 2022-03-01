@@ -41,6 +41,7 @@ dependencies:
   uuid: ^3.0.6
   flutter_sticky_header: ^0.6.0
   intl: ^0.17.0
+  nepali_utils: ^3.0.3
 
 dev_dependencies:
   flutter_test:

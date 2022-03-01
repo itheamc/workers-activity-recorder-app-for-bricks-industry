@@ -1,6 +1,7 @@
 import 'package:daily_records_sandip/models/record.dart';
 import 'package:daily_records_sandip/models/transaction.dart';
 import 'package:intl/intl.dart';
+import 'package:nepali_utils/nepali_utils.dart';
 
 extension StrExtension on String {
   List<String> asList(String separator) {
@@ -16,17 +17,31 @@ extension IntExtension on int {
     String formattedDate = dFormat.format(date);
     return formattedDate;
   }
+
+  String toNepaliDate() {
+    var date = DateTime.fromMillisecondsSinceEpoch(this).toNepaliDateTime();
+    var dFormat = NepaliDateFormat("yyyy-MM-dd");
+    String formattedDate = dFormat.format(date);
+    return formattedDate;
+  }
+
+  String toNpStyleDate() {
+    var date = DateTime.fromMillisecondsSinceEpoch(this).toNepaliDateTime();
+    var dFormat = NepaliDateFormat("MMMM dd, yyyy");
+    String formattedDate = dFormat.format(date);
+    return formattedDate;
+  }
 }
 
 extension ATransactionExtension on List<ATransaction> {
   List<ATransactions> toATransactions() {
     List<ATransactions> temps = [];
-    Set<String> dates = map((e) => e.created.toDate()).toSet();
+    Set<String> dates = map((e) => e.created.toNepaliDate()).toSet();
 
     for (final date in dates) {
       List<ATransaction> trans = [];
       for (final t in this) {
-        if (date == t.created.toDate()) {
+        if (date == t.created.toNepaliDate()) {
           trans.add(t);
         }
       }
